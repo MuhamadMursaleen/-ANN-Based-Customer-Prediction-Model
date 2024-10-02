@@ -1,82 +1,125 @@
+# Import necessary libraries
+import streamlit as st
 import numpy as np
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
 import pandas as pd
 import pickle
-import argparse
 
-# Load the trained model and encoders/scaler
-def load_resources():
-    """Load the trained model and preprocessing resources."""
-    model = tf.keras.models.load_model('model.h5')
+# Load the trained ANN model from the saved file (HDF5 format)
+model = tf.keras.models.load_model('model.h5')
 
-    with open('label_encoder_gender.pkl', 'rb') as file:
-        label_encoder_gender = pickle.load(file)
+# Load the pre-trained label encoder for the 'Gender' column
+with open('label_encoder_gender.pkl', 'rb') as file:
+    label_encoder_gender = pickle.load(file)
 
-    with open('onehot_encoder_geo.pkl', 'rb') as file:
-        onehot_encoder_geo = pickle.load(file)
+# Load the pre-trained one-hot encoder for the 'Geography' column
+with open('onehot_encoder_geo.pkl', 'rb') as file:
+    onehot_encoder_geo = pickle.load(file)
 
-    with open('scaler.pkl', 'rb') as file:
-        scaler = pickle.load(file)
+# Load the trained scaler to normalize input features
+with open('scaler.pkl', 'rb') as file:
+    scaler = pickle.load(file)
 
-    return model, label_encoder_gender, onehot_encoder_geo, scaler
+# Custom CSS for the color scheme
+st.markdown("""
+    <style>
+    /* Set background color for the app */
+    .stApp {
+        background-color: #F1D3B2;
+    }
+    /* Style for the titles */
+    .title {
+        color: #46211A;
+        font-size: 36px;
+        font-weight: bold;
+        text-align: center;
+    }
+    .subtitle {
+        color: #A43820;
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+    }
+    /* Styling the input section title */
+    .sidebar-title {
+        color: white;
+        font-size: 22px;
+        font-weight: bold;
+    }
+    /* Style input labels (Geography, Gender, etc.) */
+    .stSelectbox label, .stSlider label, .stNumberInput label {
+        color: #A43820 !important;
+        font-weight: bold;
+    }
+    /* Footer style */
+    .footer {
+        color: grey;
+        text-align: center;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-# Preprocess the input data
-def preprocess_input_data(input_file, label_encoder_gender, onehot_encoder_geo, scaler):
-    """Preprocess input data for prediction."""
-    # Load input data
-    data = pd.read_csv(input_file)
+# Streamlit app setup
+st.markdown("<h1 class='title'>Customer Churn Prediction</h1>", unsafe_allow_html=True)  # App title
+st.markdown("<h2 class='subtitle'>ANN Based Model</h2>", unsafe_allow_html=True)  # Subtitle
 
-    # Handle missing values
-    data['Geography'].fillna('Unknown', inplace=True)
-    data['Gender'].fillna('Unknown', inplace=True)
+# Sidebar Input Section
+st.sidebar.markdown("<h3 class='sidebar-title'>Input Customer Information</h3>", unsafe_allow_html=True)
 
-    # Encode 'Gender' column
-    data['Gender'] = label_encoder_gender.transform(data['Gender'])
+# Collect user inputs with replaced color for input labels
+geography = st.sidebar.selectbox('Geography', onehot_encoder_geo.categories_[0], key="geo")
+gender = st.sidebar.selectbox('Gender', label_encoder_gender.classes_, key="gender")
+age = st.sidebar.slider('Age', 18, 92, key="age")
+balance = st.sidebar.number_input('Balance', key="balance")
+credit_score = st.sidebar.number_input('Credit Score', key="credit_score")
+estimated_salary = st.sidebar.number_input('Estimated Salary', key="estimated_salary")
+tenure = st.sidebar.slider('Tenure', 0, 10, key="tenure")
+num_of_products = st.sidebar.slider('Number of Products', 1, 4, key="num_of_products")
+has_cr_card = st.sidebar.selectbox('Has Credit Card', [0, 1], key="has_cr_card")
+is_active_member = st.sidebar.selectbox('Is Active Member', [0, 1], key="is_active_member")
 
-    # One-hot encode 'Geography' column
-    geo_encoded = onehot_encoder_geo.transform(data[['Geography']])
-    geo_encoded_df = pd.DataFrame(geo_encoded, columns=onehot_encoder_geo.get_feature_names_out(['Geography']))
+# Prepare input data by creating a DataFrame from the user inputs
+input_data = pd.DataFrame({
+    'CreditScore': [credit_score],
+    'Gender': [label_encoder_gender.transform([gender])[0]],  # Encode gender using the label encoder
+    'Age': [age],
+    'Tenure': [tenure],
+    'Balance': [balance],
+    'NumOfProducts': [num_of_products],
+    'HasCrCard': [has_cr_card],
+    'IsActiveMember': [is_active_member],
+    'EstimatedSalary': [estimated_salary]
+})
 
-    # Combine one-hot encoded columns with the original data
-    data = pd.concat([data.drop('Geography', axis=1), geo_encoded_df], axis=1)
+# One-hot encode the 'Geography' feature and convert it into a DataFrame
+geo_encoded = onehot_encoder_geo.transform([[geography]]).toarray()  # Encode geography using the one-hot encoder
+geo_encoded_df = pd.DataFrame(geo_encoded, columns=onehot_encoder_geo.get_feature_names_out(['Geography']))
 
-    # Ensure all expected columns are present
-    expected_columns = scaler.feature_names_in_
-    for col in expected_columns:
-        if col not in data.columns:
-            data[col] = 0  # Add missing columns with default value 0
+# Combine the one-hot encoded 'Geography' column with the other input features
+input_data = pd.concat([input_data.reset_index(drop=True), geo_encoded_df], axis=1)
 
-    # Reorder columns to match the order expected by the scaler
-    data = data[expected_columns]
+# Scale the input data using the pre-loaded scaler to match the model's training data format
+input_data_scaled = scaler.transform(input_data)
 
-    # Scale the features
-    X_scaled = scaler.transform(data)
+# Predict the probability of customer churn using the trained ANN model
+prediction = model.predict(input_data_scaled)
+prediction_proba = prediction[0][0]  # Extract the predicted probability
 
-    return X_scaled
+# Display the predicted probability of customer churn as a metric
+st.markdown("<h3 style='color: #46211A;'>Prediction Results</h3>", unsafe_allow_html=True)
+st.metric(label="Churn Probability", value=f"{prediction_proba:.2%}")
 
-# Make predictions
-def make_predictions(model, input_file):
-    """Make predictions on the input data."""
-    _, label_encoder_gender, onehot_encoder_geo, scaler = load_resources()
-    X_scaled = preprocess_input_data(input_file, label_encoder_gender, onehot_encoder_geo, scaler)
-    
-    # Predict churn probabilities
-    predictions = model.predict(X_scaled)
-    return predictions
+# Display a progress bar to represent the probability visually
+progress = prediction_proba * 100
+st.progress(int(progress))
 
-# Main function
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Predict customer churn.')
-    parser.add_argument('--input', type=str, required=True, help='Path to the input CSV file with customer data.')
-    
-    args = parser.parse_args()
-    
-    # Load the model first
-    model, _, _, _ = load_resources()  # Only unpacking the model here
-    
-    predictions = make_predictions(model, args.input)
+# Provide a result interpretation based on the prediction threshold (0.5)
+if prediction_proba > 0.5:
+    st.markdown("<h4 class='prediction-output'>🚨 The customer is likely to churn.</h4>", unsafe_allow_html=True)
+else:
+    st.markdown("<h4 class='prediction-output'>✅ The customer is not likely to churn.</h4>", unsafe_allow_html=True)
 
-    # Output predictions
-    for i, prob in enumerate(predictions):
-        print(f'Customer {i+1}: Churn Probability: {prob[0]:.2f}')
+# Add footer or summary information
+st.markdown("<hr style='border: 2px solid #A43820;'>", unsafe_allow_html=True)
+st.markdown("<p class='footer'>Built with TensorFlow and Streamlit</p>", unsafe_allow_html=True)
