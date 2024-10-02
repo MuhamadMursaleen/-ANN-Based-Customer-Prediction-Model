@@ -9,7 +9,6 @@ This project demonstrates the creation of an Artificial Neural Network (ANN) mod
 - [Model Architecture](#model-architecture)
 - [Installation and Setup](#installation-and-setup)
 - [Running the Project](#running-the-project)
-- [Results](#results)
 - [Future Work](#future-work)
 - [License](#license)
 
@@ -99,12 +98,6 @@ python predict.py --input customer_data.csv
 
 The script will output the predictions for the new customer data.
 
-## Results
-The model was evaluated on a test set with the following metrics:
-- **Accuracy**: X.XX%
-- **Precision**: X.XX%
-- **Recall**: X.XX%
-- **F1-Score**: X.XX%
 
 ## Future Work
 - Enhance the model's architecture to improve accuracy.
