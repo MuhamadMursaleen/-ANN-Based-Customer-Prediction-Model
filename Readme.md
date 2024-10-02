@@ -45,8 +45,8 @@ The model was trained using the Adam optimizer and binary cross-entropy loss for
 
 ### Step 1: Clone the repository
 ```bash
-git clone https://github.com/your-username/ann-bank-customer-prediction.git
-cd ann-bank-customer-prediction
+git clone https://github.com/MuhamadMursaleen/-ANN-Based-Customer-Prediction-Model.git
+cd -ANN-Based-Customer-Prediction-Model
 ```
 
 ### Step 2: Create a virtual environment
