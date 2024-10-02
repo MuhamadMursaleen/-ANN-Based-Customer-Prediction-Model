@@ -34,7 +34,7 @@ def preprocess_input_data(input_file, label_encoder_gender, onehot_encoder_geo, 
     data['Gender'] = label_encoder_gender.transform(data['Gender'])
 
     # One-hot encode 'Geography' column
-    geo_encoded = onehot_encoder_geo.transform(data[['Geography']])
+    geo_encoded = onehot_encoder_geo.transform(data[['Geography']]).toarray()
     geo_encoded_df = pd.DataFrame(geo_encoded, columns=onehot_encoder_geo.get_feature_names_out(['Geography']))
 
     # Combine one-hot encoded columns with the original data
