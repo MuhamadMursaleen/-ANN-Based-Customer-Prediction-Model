@@ -10,6 +10,7 @@ This project demonstrates the creation of an Artificial Neural Network (ANN) mod
 - [Model Architecture](#model-architecture)
 - [Installation and Setup](#installation-and-setup)
 - [Running the Project](#running-the-project)
+- [Streamlit App](#streamlit-app)
 - [Future Work](#future-work)
 - [License](#license)
 
@@ -134,7 +135,9 @@ For a user-friendly interface, you can run the Streamlit app:
 streamlit run app.py
 ```
 
-This will open a new tab in your web browser where you can enter customer data and see the predicted churn probability.
+Or, you can access the deployed app directly on Streamlit:
+
+[Live Streamlit App](https://ann-based-customer-prediction-model.streamlit.app/)
 
 ## Future Work
 
