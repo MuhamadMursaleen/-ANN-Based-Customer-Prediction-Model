@@ -1,6 +1,3 @@
-Here’s a combined README file that integrates both your previous content and the new structure for your project. This version maintains clarity and is beginner-friendly, guiding users through the setup and usage of your Customer Churn Prediction project.
-
----
 
 # ANN-Based Customer Churn Prediction Model
 
