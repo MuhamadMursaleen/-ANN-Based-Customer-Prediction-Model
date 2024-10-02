@@ -4,8 +4,9 @@ import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint,TensorBoard
 import pickle
+import datetime
 
 # Load and preprocess the dataset
 def load_data(file_path):
@@ -17,15 +18,15 @@ def preprocess_data(data):
     """Preprocess the data by encoding categorical variables and scaling."""
     
     # Drop columns that are not needed for prediction
-    data = data.drop(['CustomerId', 'Surname'], axis=1)
+    data = data.drop(['RowNumber','CustomerId', 'Surname'], axis=1)
     
     # Encode the 'Gender' column
     label_encoder_gender = LabelEncoder()
     data['Gender'] = label_encoder_gender.fit_transform(data['Gender'])
     
     # One-hot encode the 'Geography' column
-    onehot_encoder_geo = OneHotEncoder(drop='first', sparse_output=False)
-    geo_encoded = onehot_encoder_geo.fit_transform(data[['Geography']])
+    onehot_encoder_geo = OneHotEncoder()
+    geo_encoded = onehot_encoder_geo.fit_transform(data[['Geography']]).toarray()
     geo_encoded_df = pd.DataFrame(geo_encoded, columns=onehot_encoder_geo.get_feature_names_out(['Geography']))
     
     # Combine one-hot encoded columns with the original data
@@ -70,16 +71,17 @@ def build_model(input_shape):
 def train_model(X_train, y_train, X_test, y_test):
     """Train the ANN model with the given training data."""
     
+    log_dir="logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorflow_callback=TensorBoard(log_dir=log_dir,histogram_freq=1)
     # Build the model
     model = build_model(X_train.shape[1])
     
     # Set up callbacks
     early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-    model_checkpoint = ModelCheckpoint('best_model.h5', save_best_only=True, monitor='val_loss')
     
     # Train the model
     history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=100, 
-                        callbacks=[early_stopping, model_checkpoint])
+                        callbacks=[tensorflow_callback, early_stopping])
     
     # Save the final model
     model.save('model.h5')
