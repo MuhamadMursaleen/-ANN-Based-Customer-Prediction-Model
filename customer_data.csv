@@ -1,0 +1,11 @@
+CustomerId,CreditScore,Gender,Age,Tenure,Balance,NumOfProducts,HasCrCard,IsActiveMember,EstimatedSalary,Geography
+1,619,Female,42,2,0.00,1,1,1,101348.88,France
+2,608,Female,41,1,83807.86,1,0,1,112542.58,Spain
+3,502,Female,42,8,159660.80,3,1,0,113931.57,France
+4,699,Female,39,1,0.00,2,0,0,93826.63,France
+5,850,Female,43,2,125510.82,1,1,1,79084.10,Spain
+6,645,Male,44,8,113755.78,2,1,0,149756.71,Germany
+7,822,Male,50,7,0.00,2,1,1,10062.80,Germany
+8,376,Female,29,4,115046.74,4,1,0,119346.88,Germany
+9,501,Male,44,4,142051.07,2,0,1,74940.50,France
+10,684,Male,27,2,134603.88,1,1,1,71725.73,Germany
