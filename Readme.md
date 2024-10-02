@@ -54,7 +54,7 @@ Open your terminal and clone the repository using:
 
 ```bash
 git clone https://github.com/MuhamadMursaleen/-ANN-Based-Customer-Prediction-Model.git
-cd -ANN-Based-Customer-Prediction-Model
+cd -ANN-Based-Customer-Prediction-Model-main
 ```
 
 ### Step 2: Create a Virtual Environment
